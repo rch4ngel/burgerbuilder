@@ -19,6 +19,7 @@ const buildControls = (props) => (
                 label={ctrl.label}
                 added={() => props.ingredientAdded(ctrl.type)}
                 removed={() => props.ingredientSubracted(ctrl.type)}
+                disabled={props.disabledInfo[ctrl.type]}
             />
         ))}
         <label>Price: {props.totalPrice}</label>
