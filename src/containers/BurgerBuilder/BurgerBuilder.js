@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import Aux from '../../hoc/Aux';
 import Burger from '../../components/Burger/Burger'
 import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+import Modal from '../../components/UI/Modal/Modal'
+import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary'
 
 const INGREDIENT_PRICES = {
     'salad'     : 0.5,
@@ -20,7 +22,25 @@ class BurgerBuilder extends Component {
             'cheese'    : 0,
             'meat'      : 0,
         },
-        totalPrice: 4
+        totalPrice: 4,
+        canPurchase: false,
+        purchasing: false,
+    };
+
+    purchaseHandler = () => {
+        this.setState({purchasing: true});
+    };
+
+    updatePurchaseState(ingredients) {
+        const sum = Object.keys(ingredients)
+            .map(igKey => {
+                return ingredients[igKey]
+            })
+            .reduce((sum, el) => {
+                return sum + el;
+            }, 0);
+
+        this.setState({canPurchase: sum > 0})
     };
 
     addIngredientHandler = (type) => {
@@ -33,7 +53,8 @@ class BurgerBuilder extends Component {
         const priceAddition = INGREDIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
-        this.setState({totalPrice: newPrice, ingredients: updatedIngredients})
+        this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
+        this.updatePurchaseState(updatedIngredients);
     };
 
 
@@ -50,7 +71,8 @@ class BurgerBuilder extends Component {
         const priceSubtraction = INGREDIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice - priceSubtraction;
-        this.setState({totalPrice: newPrice, ingredients: updatedIngredients})
+        this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
+        this.updatePurchaseState(updatedIngredients);
     };
 
     render() {
@@ -68,9 +90,14 @@ class BurgerBuilder extends Component {
                 <BuildControls
                     ingredientAdded={this.addIngredientHandler}
                     ingredientSubracted={this.removeIndgredientHandler}
-                    totalPrice={this.state.totalPrice}
+                    canPurchase={this.state.canPurchase}
+                    totalPrice={this.state.totalPrice.toFixed(2)}
+                    ordering={this.purchaseHandler}
                     disabledInfo={disabledInfo}
                 />
+                <Modal show={this.state.purchasing}>
+                    <OrderSummary ingredients={this.state.ingredients}/>
+                </Modal>
             </Aux>
         )
     }
